@@ -5,7 +5,8 @@ Neural Data Analysis - First Order Effects (Figure 3)
 ==================================================
 
 This script generates Figure 3 of the paper, analyzing and visualizing first-order effects
-in neural data processing during language comprehension tasks. It examines three main effects:
+in neural data. It examines the three main effects of:
+
 1. Violation
 2. Congruency 
 3. Transition
