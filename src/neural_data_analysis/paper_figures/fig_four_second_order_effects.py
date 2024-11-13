@@ -13,7 +13,7 @@ Key Analyses:
 1. Congruency Effects: Analyzes how grammatical congruency interacts with:
    - PP-Number: Prepositional Phrase number agreement
    - ObjRC-Number: Object Relative Clause number agreement
-   - PP-Animacy: SAnimacy in Prepositional Phrases
+   - PP-Animacy: Animacy in Prepositional Phrases
 
 Features:
 ---------
@@ -215,11 +215,6 @@ def gn_parsing_object(args: argparse.Namespace) -> str:
         - "singular_distractor": When analyzing only singular distractors
         - "plural_distractor": When analyzing only plural distractors
 
-    Notes
-    -----
-    This function is used to filter experimental data based on the grammatical 
-    number of distractors in linguistic stimuli. It's crucial for analyzing 
-    number agreement effects.
     """
     if args.distractor_number == "all":
         distractor_type = "both_distractors"
