@@ -196,7 +196,9 @@ def gn_parsing_object(args: argparse.Namespace) -> str:
     Notes
     -----
     This function is used to filter experimental data based on the grammatical 
-    number of distractors in linguistic stimuli.
+    number of the attractor (or distractor since it intervents and distracts
+    participants).
+    
     """
     if args.distractor_number == "all":
         distractor_type = "both_distractors"
