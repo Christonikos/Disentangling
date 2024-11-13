@@ -1,31 +1,59 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# ============================================================================
 """
----------------------------------------------------------
-## FIRST ORDER EFFECTS 
----------------------------------------------------------
+Neural Data Analysis - First Order Effects (Figure 3)
+==================================================
 
-This script generates figures for the first order effects in neural data analysis.
+This script generates Figure 3 of the paper, analyzing and visualizing first-order effects
+in neural data processing during language comprehension tasks. It examines three main effects:
+1. Violation
+2. Congruency 
+3. Transition
 
-This corresponds to the fig.3 of the paper.
+Key Features:
+------------
+- Processes MEG/EEG data for different experimental conditions
+- Handles multiple data types (raw, preprocessed)
+- Supports various sensor configurations (MEG, EEG, combined)
+- Implements statistical analysis with cluster-based permutation tests
+- Generates publication-ready figure with error bars and significance markers (SEM)
 
-The script analyzes the main effects of Violation, Congruency, and Transition
-in neural data. It processes input arguments to configure the analysis, collects
-scores from subjects, and generates plots to visualize the effects.
+Main Parameters:
+--------------
+- events_of_interest: Which events to analyze (e.g., "first_word_onset")
+- response_type: Filter by response accuracy ("correct", "false", "all")
+- distractor_number: Grammatical number filtering ("sing", "plur", "all")
+- sensor_type: Sensor selection ("meg", "eeg", "mag", "grad", "all")
+- data_type: Processing level ("raw", "preprocessed")
+- baseline: Whether to apply baseline correction
+- crop: Whether to crop epochs around target onset
+- roi: Region of interest for analysis
 
-Functions:
-----------
-- gn_parsing_object: Determines the distractor type based on grammatical number.
-- response_parsing_object: Determines the response type based on response category.
-- length_parsing_object: Determines the length of the epoch based on cropping.
-- baseline_parsing_object: Determines whether baseline correction is applied.
-- ssp_parsing_object: Determines whether SSP cleaning is applied.
-- grid_search_parsing_object: Determines whether grid search is applied.
-- collect_scores: Collects scores from all subjects for a given construction and effect.
-- make_figs_path: Creates the path for saving figures.
-- diagonal_cluster_test: Performs a permutation cluster test on diagonals.
+Usage:
+------
+python fig_three_main_effects.py [-h] [-eoi EVENTS] [-rt RESPONSE_TYPE] 
+                                [-dn DISTRACTOR_NUMBER] [-sensor SENSOR_TYPE]
+                                [-data DATA_TYPE] [-baseline BASELINE]
+                                [-crop CROP] ...
+
+Example:
+-------
+python fig_three_main_effects.py -eoi first_word_onset -rt correct -sensor meg 
+                                -data preprocessed -baseline yes
+
+
+
+Notes:
+------
+- The script assumes a specific directory structure for input/output
+- Statistical significance is assessed using cluster-based permutation tests
+- Smoothing can be applied to the results for visualization
+
+Author: Christos-Nikolaos Zacharopoulos
+
 """
+
+
 # ============================================================================
 # modules
 import sys
@@ -149,13 +177,25 @@ root_dir = "first_order_effects"
 # =============================================================================
 def gn_parsing_object(args: argparse.Namespace) -> str:
     """
-    Parse the grammatical number of the distractor from the arguments.
+    Parse and validate the grammatical number settings for distractor analysis.
 
-    Parameters:
-    args (argparse.Namespace): The arguments passed to the script.
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments containing distractor_number setting
 
-    Returns:
-    str: The type of distractor based on the grammatical number.
+    Returns
+    -------
+    str
+        The parsed distractor type:
+        - "both_distractors": When analyzing all grammatical numbers
+        - "singular_distractor": When analyzing only singular distractors
+        - "plural_distractor": When analyzing only plural distractors
+
+    Notes
+    -----
+    This function is used to filter experimental data based on the grammatical 
+    number of distractors in linguistic stimuli.
     """
     if args.distractor_number == "all":
         distractor_type = "both_distractors"
@@ -172,13 +212,25 @@ def gn_parsing_object(args: argparse.Namespace) -> str:
 # =============================================================================
 def response_parsing_object(args: argparse.Namespace) -> str:
     """
-    Parse the response type from the arguments.
+    Parse and validate response type settings for analysis filtering.
 
-    Parameters:
-    args (argparse.Namespace): The arguments passed to the script.
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments containing response_type setting
 
-    Returns:
-    str: The type of response based on the response type.
+    Returns
+    -------
+    str
+        The parsed response type:
+        - "all_responses": Include all participant responses
+        - "correct_responses": Include only correct responses
+        - "false_responses": Include only incorrect responses
+
+    Notes
+    -----
+    This function is used to filter experimental data based on participant 
+    response accuracy.
     """
     if args.response_type == "all":
         response_type = "all_responses"
@@ -195,13 +247,24 @@ def response_parsing_object(args: argparse.Namespace) -> str:
 # =============================================================================
 def length_parsing_object(args: argparse.Namespace) -> str:
     """
-    Parse the length of the epoch based on cropping from the arguments.
+    Parse and validate epoch length settings for temporal analysis.
 
-    Parameters:
-    args (argparse.Namespace): The arguments passed to the script.
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments containing crop setting
 
-    Returns:
-    str: The length of the epoch based on cropping.
+    Returns
+    -------
+    str
+        The parsed length type:
+        - "cropped_around_target": Analysis window centered on target stimulus
+        - "whole_sentence": Full sentence analysis window
+
+    Notes
+    -----
+    This function determines the temporal window used for analysis, either 
+    focusing on the target stimulus or analyzing the entire sentence.
     """
     if args.crop == "yes":
         length = "cropped_around_target"
@@ -216,13 +279,20 @@ def length_parsing_object(args: argparse.Namespace) -> str:
 # =============================================================================
 def baseline_parsing_object(args: argparse.Namespace) -> str:
     """
-    Parse the baseline correction option from the arguments.
+    Parse and validate baseline correction settings.
 
-    Parameters:
-    args (argparse.Namespace): The arguments passed to the script.
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments containing baseline setting
 
-    Returns:
-    str: 'with_baseline' if baseline correction is applied, otherwise 'without_baseline'.
+    Returns
+    -------
+    str
+        The parsed baseline setting:
+        - "with_baseline": Apply baseline correction
+        - "without_baseline": Skip baseline correction
+
     """
     if args.baseline == "yes":
         baseline = "with_baseline"
@@ -237,13 +307,20 @@ def baseline_parsing_object(args: argparse.Namespace) -> str:
 # =============================================================================
 def ssp_parsing_object(args: argparse.Namespace) -> str:
     """
-    Parse the SSP (Signal Space Projection) option from the arguments.
+    Parse and validate Signal Space Projection (SSP) settings.
 
-    Parameters:
-    args (argparse.Namespace): The arguments passed to the script.
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments containing ssp setting
 
-    Returns:
-    str: 'with_ssp' if SSP is applied, otherwise 'without_ssp'.
+    Returns
+    -------
+    str
+        The parsed SSP setting:
+        - "with_ssp": Apply SSP noise reduction
+        - "without_ssp": Skip SSP processing
+
     """
     if args.ssp == "yes":
         ssp = "with_ssp"
@@ -257,13 +334,21 @@ def ssp_parsing_object(args: argparse.Namespace) -> str:
 # =============================================================================
 def grid_search_parsing_object(args: argparse.Namespace) -> str:
     """
-    Parse the grid search option from the arguments.
+    Parse and validate grid search settings for parameter optimization.
 
-    Parameters:
-    args (argparse.Namespace): The arguments passed to the script.
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments containing grid setting
 
-    Returns:
-    str: 'with_grid_search' if grid search is applied, otherwise 'without_grid_search'.
+    Returns
+    -------
+    str
+        The parsed grid search setting:
+        - "with_grid_search": Use grid search for parameter optimization
+        - "without_grid_search": Use default parameters
+
+
     """
     if args.grid == "yes":
         grid = "with_grid_search"
@@ -275,22 +360,39 @@ def grid_search_parsing_object(args: argparse.Namespace) -> str:
 # =============================================================================
 # Collect scores from all subjects per construction, effect and SOA
 # =============================================================================
-def collect_scores(path, construction, effect):
+def collect_scores(path: str, construction: str, effect: str) -> tuple:
     """
+    Aggregate and process decoding scores across all subjects.
+
     Parameters
     ----------
-    path : object (c.path)
-    soa : Options [125, 250, 325, 500] (c.soas) #comes from another project. No multiple SOAS in
-    this project.
-    construction : Options [pp, obj] (c.constructions)
-    effect : Options (c.first_order_effects or c.second_order_effects)
+    path : str
+        Base path to the data directory
+    construction : str
+        Type of linguistic construction ('pp', 'obj', 'sem')
+    effect : str
+        The effect being analyzed (from c.first_order_effects)
 
     Returns
     -------
-    all_diagonals : List that contains the diag of the GAT. len(list)=#subjects
-    all_scores : List that contains the GAT. len(list)=#subjects
-    error : The SEM of the diagonals
+    tuple
+        Contains:
+        - all_diagonals : list
+            Diagonal scores for each subject [n_subjects × n_timepoints]
+        - all_scores : list
+            Full GAT matrices for each subject [n_subjects × n_timepoints × n_timepoints]
+        - error : ndarray
+            Standard error of the mean across subjects
+        - times : ndarray
+            Time points vector for the analysis
 
+    Notes
+    -----
+    - Loads and processes pre-computed numpy arrays
+    - Handles different experimental conditions through parsing objects
+    - Organizes results based on specified directory structure
+    - Can handle multiple data types (raw, preprocessed)
+    - Supports various sensor configurations
     """
 
     all_diagonals, all_scores = ([] for i in range(0, 2))
@@ -360,17 +462,29 @@ def collect_scores(path, construction, effect):
 # =============================================================================
 def make_figs_path(construction: str) -> str:
     """
-    Creates the path for saving figures of decoding results.
+    Generate standardized file paths for saving figure outputs.
 
     Parameters
     ----------
     construction : str
-        The construction type (e.g., 'pp', 'obj').
+        The linguistic construction type being analyzed (e.g., 'pp', 'obj')
 
     Returns
     -------
     str
-        The full path to the figure file.
+        Complete file path for saving the figure, including all relevant 
+        parameters in the directory structure
+
+    Notes
+    -----
+    - Creates nested directory structure if it doesn't exist
+    - Incorporates multiple experimental parameters in path:
+        - ROI
+        - Effect type
+        - Sensor type
+        - Data processing level
+        - Response filtering
+        - Baseline correction status
     """
     # General path for decoding results
     path2figs = c.join(
@@ -407,26 +521,31 @@ def make_figs_path(construction: str) -> str:
 
 def diagonal_cluster_test(all_diagonals: list) -> tuple:
     """
-    Perform a permutation cluster test on the provided diagonals.
+    Perform cluster-based permutation testing on diagonal scores.
 
     Parameters
     ----------
     all_diagonals : list
-        A list of arrays where each array represents the diagonal scores for a subject.
+        List of arrays containing diagonal scores for each subject
+        Shape: [n_subjects × n_timepoints]
 
     Returns
     -------
     tuple
-        A tuple containing:
-        - cluster_p_values: The p-values for each identified cluster.
-        - clusters: The clusters identified in the permutation test.
+        Contains:
+        - cluster_p_values : array
+            P-values for each identified cluster
+        - clusters : list
+            List of boolean masks identifying significant clusters
 
     Notes
     -----
-    - The function first converts the input list to a numpy array.
-    - A cluster threshold is set using a t-distribution with a p-value threshold of 0.01.
-    - The permutation cluster test is performed with 1000 permutations.
-    - The function currently does not apply FDR correction to the cluster p-values.
+    - Uses MNE's implementation of cluster-based permutation testing
+    - Default parameters:
+        - 1000 permutations
+        - One-tailed test (tail=1)
+        - Threshold determined by t-distribution (p < 0.01)
+
     """
 
     # Convert the list of diagonals to a numpy array

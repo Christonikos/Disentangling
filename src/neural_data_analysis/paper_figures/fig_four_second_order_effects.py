@@ -2,29 +2,80 @@
 # -*- coding: utf-8 -*-
 # ============================================================================
 """
----------------------------------------------------------
-## SECOND ORDER EFFECTS 
----------------------------------------------------------
+Neural Data Analysis - Second Order Effects (Figure 4)
+===================================================
 
-This script generates figures for the second order effects in neural data analysis.
+This script generates Figure 4 of the paper, analyzing and visualizing second-order 
+(interaction) effects in neural data during language processing tasks.
 
-This corresponds to the fig.4 of the paper.
+Key Analyses:
+------------
+1. Congruency Effects: Analyzes how grammatical congruency interacts with:
+   - PP-Number: Prepositional Phrase number agreement
+   - ObjRC-Number: Object Relative Clause number agreement
+   - PP-Animacy: SAnimacy in Prepositional Phrases
 
-The script analyzes the interaction effects of various factors in neural data. 
-It processes input arguments to configure the analysis, collects scores from subjects, 
-and generates plots to visualize the effects.
+Features:
+---------
+- Processes MEG/EEG data across multiple experimental conditions
+- Implements cluster-based statistical testing
+- Generates publication-ready figure with:
+  * Separate plots for each construction type
+  * Error bars showing standard error of the mean
+  * Significance markers for cluster-based statistics
 
-Functions:
-----------
-- gn_parsing_object: Determines the distractor type based on grammatical number.
-- response_parsing_object: Determines the response type based on response category.
-- length_parsing_object: Determines the length of the epoch based on cropping.
-- baseline_parsing_object: Determines whether baseline correction is applied.
-- ssp_parsing_object: Determines whether SSP cleaning is applied.
-- grid_search_parsing_object: Determines whether grid search is applied.
-- collect_scores: Collects scores from all subjects for a given construction and effect.
-- make_figs_path: Creates the path for saving figures.
-- diagonal_cluster_test: Performs a permutation cluster test on diagonals.
+
+Main Parameters:
+--------------
+events_of_interest : list
+    Which events to analyze (default: ["first_word_onset"])
+response_type : str
+    Filter by response accuracy ("correct", "false", "all")
+distractor_number : str
+    Grammatical number filtering ("sing", "plur", "all")
+sensor_type : str
+    Sensor selection ("meg", "eeg", "mag", "grad", "all")
+data_type : str
+    Processing level ("raw", "preprocessed")
+roi : str
+    Region of interest for analysis
+
+Usage:
+------
+python fig_four_second_order_effects.py [-h] [-eoi EVENTS] [-rt RESPONSE_TYPE] 
+                                      [-dn DISTRACTOR_NUMBER] [-sensor SENSOR_TYPE]
+                                      [-data DATA_TYPE] ...
+
+Example:
+-------
+python fig_four_second_order_effects.py -eoi first_word_onset -rt correct -sensor meg 
+                                      -data preprocessed -baseline yes
+
+Dependencies:
+------------
+Standard Library:
+    - sys
+    - argparse
+External:
+    - numpy: Numerical computations
+    - matplotlib: Plotting
+    - seaborn: Enhanced plotting
+    - scipy: Statistical functions
+    - mne: MEG/EEG analysis
+    - statsmodels: Statistical modeling
+Local:
+    - config: Configuration settings
+    - func_repo: Utility functions
+
+Notes:
+------
+- The script assumes a specific directory structure for input/output
+- Statistical significance is assessed using cluster-based permutation tests
+- Results can be smoothed using Gaussian filtering for visualization
+- Timing information is extracted and saved for further analysis
+
+Author: Christos-Nikolaos Zacharopoulos
+
 """
 # ============================================================================
 # modules
@@ -145,13 +196,30 @@ effect = "congruency_effects"
 # =============================================================================
 def gn_parsing_object(args: argparse.Namespace) -> str:
     """
-    Parse the grammatical number of the distractor from the arguments.
+    Parse and validate grammatical number settings for distractor analysis.
 
-    Parameters:
-    args (argparse.Namespace): The arguments passed to the script.
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments containing distractor_number setting.
+        Valid options are:
+        - "all": Include all grammatical numbers
+        - "sing": Include only singular distractors
+        - "plur": Include only plural distractors
 
-    Returns:
-    str: The type of distractor based on the grammatical number.
+    Returns
+    -------
+    str
+        The parsed distractor type:
+        - "both_distractors": When analyzing all grammatical numbers
+        - "singular_distractor": When analyzing only singular distractors
+        - "plural_distractor": When analyzing only plural distractors
+
+    Notes
+    -----
+    This function is used to filter experimental data based on the grammatical 
+    number of distractors in linguistic stimuli. It's crucial for analyzing 
+    number agreement effects.
     """
     if args.distractor_number == "all":
         distractor_type = "both_distractors"
@@ -168,13 +236,29 @@ def gn_parsing_object(args: argparse.Namespace) -> str:
 # =============================================================================
 def response_parsing_object(args: argparse.Namespace) -> str:
     """
-    Parse the response type from the arguments.
+    Parse and validate response type settings for analysis filtering.
 
-    Parameters:
-    args (argparse.Namespace): The arguments passed to the script.
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments containing response_type setting.
+        Valid options are:
+        - "all": Include all responses
+        - "correct": Include only correct responses
+        - "false": Include only incorrect responses
 
-    Returns:
-    str: The type of response based on the response type.
+    Returns
+    -------
+    str
+        The parsed response type:
+        - "all_responses": Include all participant responses
+        - "correct_responses": Include only correct responses
+        - "false_responses": Include only incorrect responses
+
+    Notes
+    -----
+    This function enables analysis of neural responses based on behavioral 
+    performance, allowing investigation of error-related processing.
     """
     if args.response_type == "all":
         response_type = "all_responses"
@@ -191,13 +275,23 @@ def response_parsing_object(args: argparse.Namespace) -> str:
 # =============================================================================
 def length_parsing_object(args: argparse.Namespace) -> str:
     """
-    Parse the length of the epoch based on cropping from the arguments.
+    Parse and validate epoch length settings for temporal analysis.
 
-    Parameters:
-    args (argparse.Namespace): The arguments passed to the script.
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments containing crop setting.
+        Valid options are:
+        - "yes": Crop epochs around target
+        - "no": Use full sentence epochs
 
-    Returns:
-    str: The length of the epoch based on cropping.
+    Returns
+    -------
+    str
+        The parsed length type:
+        - "cropped_around_target": Analysis window centered on target stimulus
+        - "whole_sentence": Full sentence analysis window
+
     """
     if args.crop == "yes":
         length = "cropped_around_target"
@@ -212,13 +306,23 @@ def length_parsing_object(args: argparse.Namespace) -> str:
 # =============================================================================
 def baseline_parsing_object(args: argparse.Namespace) -> str:
     """
-    Parse the baseline correction option from the arguments.
+    Parse and validate baseline correction settings.
 
-    Parameters:
-    args (argparse.Namespace): The arguments passed to the script.
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments containing baseline setting.
+        Valid options are:
+        - "yes": Apply baseline correction
+        - "no": Skip baseline correction
 
-    Returns:
-    str: 'with_baseline' if baseline correction is applied, otherwise 'without_baseline'.
+    Returns
+    -------
+    str
+        The parsed baseline setting:
+        - "with_baseline": Apply baseline correction
+        - "without_baseline": Skip baseline correction
+
     """
     if args.baseline == "yes":
         baseline = "with_baseline"
@@ -233,13 +337,23 @@ def baseline_parsing_object(args: argparse.Namespace) -> str:
 # =============================================================================
 def ssp_parsing_object(args: argparse.Namespace) -> str:
     """
-    Parse the SSP (Signal Space Projection) option from the arguments.
+    Parse and validate Signal Space Projection (SSP) settings.
 
-    Parameters:
-    args (argparse.Namespace): The arguments passed to the script.
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments containing ssp setting.
+        Valid options are:
+        - "yes": Apply SSP
+        - "no": Skip SSP
 
-    Returns:
-    str: 'with_ssp' if SSP is applied, otherwise 'without_ssp'.
+    Returns
+    -------
+    str
+        The parsed SSP setting:
+        - "with_ssp": Apply SSP noise reduction
+        - "without_ssp": Skip SSP processing
+
     """
     if args.ssp == "yes":
         ssp = "with_ssp"
@@ -253,13 +367,23 @@ def ssp_parsing_object(args: argparse.Namespace) -> str:
 # =============================================================================
 def grid_search_parsing_object(args: argparse.Namespace) -> str:
     """
-    Parse the grid search option from the arguments.
+    Parse and validate grid search settings for parameter optimization.
 
-    Parameters:
-    args (argparse.Namespace): The arguments passed to the script.
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command line arguments containing grid setting.
+        Valid options are:
+        - "yes": Use grid search
+        - "no": Use default parameters
 
-    Returns:
-    str: 'with_grid_search' if grid search is applied, otherwise 'without_grid_search'.
+    Returns
+    -------
+    str
+        The parsed grid search setting:
+        - "with_grid_search": Use grid search for parameter optimization
+        - "without_grid_search": Use default parameters
+
     """
     if args.grid == "yes":
         grid = "with_grid_search"
@@ -271,23 +395,38 @@ def grid_search_parsing_object(args: argparse.Namespace) -> str:
 # =============================================================================
 # Collect scores from all subjects per construction, effect and SOA
 # =============================================================================
-def collect_scores(path, construction, effect, condition):
+def collect_scores(path: str, construction: str, effect: str, condition: str) -> tuple:
     """
+    Aggregate decoding scores across subjects for specific experimental conditions.
+
     Parameters
     ----------
-    path : object (c.path)
-    soa : Options [125, 250, 325, 500] (c.soas)
-    construction : Options [pp, obj] (c.constructions)
-    effect : Options (c.first_order_effects or c.second_order_effects)
+    path : str
+        Base path to the data directory
+    construction : str
+        Type of linguistic construction ('pp', 'obj', 'sem')
+    effect : str
+        The effect being analyzed (from second_order_effects)
+    condition : str
+        Specific condition to analyze ('congruent' or 'incongruent')
 
     Returns
     -------
-    all_diagonals : List that contains the diag of the GAT. len(list)=#subjects
-    all_scores : List that contains the GAT. len(list)=#subjects
-    error : The SEM of the diagonals
+    tuple
+        - all_diagonals : list
+            Diagonal scores for each subject [n_subjects × n_timepoints]
+        - error : ndarray
+            Standard error of the mean across subjects
+        - times : ndarray
+            Time points vector for the analysis
 
+    Notes
+    -----
+    - Loads pre-computed scores from numpy arrays
+    - Handles different experimental conditions through parsing objects
+    - Automatically detects and loads appropriate time vectors
+    - Compatible with various sensor configurations and preprocessing options
     """
-
     all_diagonals = []
     for subject in c.subjects_list:
         path2scores = c.join(
@@ -318,10 +457,10 @@ def collect_scores(path, construction, effect, condition):
         )
         all_diagonals.append(diag)
 
-    # returns the SEM of the diagonals across subjects
+    # Calculate standard error of the mean across subjects
     error = stats.sem(all_diagonals, axis=0)
 
-    # return the times vector
+    # Load time vector from first subject (same for all)
     path_in = c.join(
         c.project_path,
         "Output",
@@ -354,8 +493,33 @@ def collect_scores(path, construction, effect, condition):
 # =============================================================================
 # Create the figures path
 # =============================================================================
-def make_figs_path(construction):
-    # general path for decoding results
+def make_figs_path(construction: str) -> str:
+    """
+    Generate standardized file paths for saving figures.
+
+    Parameters
+    ----------
+    construction : str
+        The linguistic construction type being analyzed
+
+    Returns
+    -------
+    str
+        Complete file path for saving the figure
+
+    Notes
+    -----
+    - Creates nested directory structure if it doesn't exist
+    - Incorporates experimental parameters in path:
+        * ROI
+        * Effect type
+        * Sensor type
+        * Data processing level
+        * Response filtering
+        * Baseline correction status
+
+    """
+    # General path for decoding results
     path2figs = c.join(
         c.figures_path,
         "decoding_results",
@@ -372,7 +536,7 @@ def make_figs_path(construction):
         response_parsing_object(args),
         gn_parsing_object(args),
     )
-    # make path
+    # Create path if it doesn't exist
     if not c.exists(path2figs):
         c.make(path2figs)
     fname = c.join(path2figs, "second_order_effects.pdf")
@@ -385,13 +549,23 @@ def make_figs_path(construction):
 # =============================================================================
 def color_and_title(construction: str) -> tuple[str, str]:
     """
-    Return the title and color associated with a given construction.
+    Determine the visualization properties for each construction type.
 
-    Parameters:
-    construction (str): The type of construction. Options are "pp_syntax", "objrc_syntax", and "pp_semantics".
+    Parameters
+    ----------
+    construction : str
+        The type of construction being analyzed. Options:
+        - "pp_syntax": Prepositional Phrase Number agreement
+        - "objrc_syntax": Object Relative Clause Number agreement
+        - "pp_semantics": Prepositional Phrase Animacy
 
-    Returns:
-    tuple[str, str]: A tuple containing the title and color associated with the construction.
+    Returns
+    -------
+    tuple[str, str]
+        - title: Formatted title string with mathematical notation
+        - color: Color code for plotting (darkblue, darkgreen, or darkred)
+
+
     """
     if construction == "pp_syntax":
         title = r"$\mathcal{PP-Number}$"
@@ -410,36 +584,43 @@ def color_and_title(construction: str) -> tuple[str, str]:
 # =============================================================================
 
 
-def diagonal_cluster_test(
-    all_diagonals: np.ndarray,
-) -> tuple[np.ndarray, list[np.ndarray]]:
+def diagonal_cluster_test(all_diagonals: np.ndarray) -> tuple[np.ndarray, list[np.ndarray]]:
     """
-    Perform a permutation cluster test on the provided diagonals.
+    Perform cluster-based permutation testing on temporal data.
 
-    This function computes the cluster-level statistics for the given diagonals
-    using a permutation test. It returns the p-values for each cluster and the
-    clusters themselves.
+    Parameters
+    ----------
+    all_diagonals : np.ndarray
+        Subject-wise diagonal scores, shape: (n_subjects, n_timepoints)
 
-    Parameters:
-    all_diagonals (np.ndarray): A 2D array where each row represents a subject's
-                                diagonal data.
+    Returns
+    -------
+    tuple[np.ndarray, list[np.ndarray]]
+        - cluster_p_values: P-values for each identified cluster
+        - clusters: List of boolean masks identifying significant clusters
 
-    Returns:
-    tuple[np.ndarray, list[np.ndarray]]: A tuple containing:
-        - cluster_p_values (np.ndarray): An array of p-values for each identified cluster.
-        - clusters (list[np.ndarray]): A list of arrays, each representing a cluster mask.
+    Statistical Details
+    ------------------
+    - Uses MNE's cluster-based permutation test
+    - Parameters:
+        * Permutations: 1000
+        * Threshold: p < 0.01 (two-tailed)
+        * Test statistic: one-sample t-test
+    - FDR correction available but currently disabled
+
+    Notes
+    -----
+    The function identifies temporally contiguous clusters of significant 
+    differences from chance level (0.5) while controlling for multiple 
+    comparisons.
     """
-    # ~~~~~~~~~~~~~~~~~~~
-    ## Set threshold
-    # ~~~~~~~~~~~~~~~~~~~
     # Set cluster threshold
     p_threshold = 0.01
     n_subjects = len(c.subjects_list)
     thres = -stats.distributions.t.ppf(p_threshold / 2.0, n_subjects - 1)
     thres = None
-    # ~~~~~~~~~~~~~~~~~~~
-    ## Compute statistic
-    # ~~~~~~~~~~~~~~~~~~~
+
+    # Compute statistic
     fvals, clusters, cluster_p_values, H0 = permutation_cluster_1samp_test(
         all_diagonals - 0,
         n_permutations=1000,
@@ -450,7 +631,7 @@ def diagonal_cluster_test(
         seed=42,
         out_type="mask",
     )
-    # Correct with FDR (commented out)
+    # FDR correction is available but currently disabled
     # _, cluster_p_values = fdr(cluster_p_values)
 
     return cluster_p_values, clusters

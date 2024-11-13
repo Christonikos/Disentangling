@@ -2,30 +2,71 @@
 # -*- coding: utf-8 -*-
 # ============================================================================
 """
----------------------------------------------------------
-## THIRD ORDER EFFECTS 
----------------------------------------------------------
+Neural Data Analysis - Third Order Effects (Figure 6)
+==================================================
 
-This script generates figures for the third order effects in neural data analysis.
+This script generates Figure 6 of the paper, analyzing and visualizing third-order 
+(interaction between congruency, grammaticallity and grammaical number) effects in 
+the neural data.
 
-This corresponds to the fig.6 of the paper.
+
+Features:
+---------
+- Processes MEG/EEG data across multiple experimental conditions
+- Implements advanced statistical testing:
+    * Cluster-based permutation tests
+    * Temporal smoothing
+- Generates publication-ready figure with:
+    * Multiple subplot layout
+    * Error bars (SEM)
+    * Significance markers
+    * Custom styling per condition
+
+Main Parameters:
+--------------
+events_of_interest : list
+    Events to analyze (default: ["first_word_onset"])
+response_type : str
+    Response accuracy filter ("correct", "false", "all")
+distractor_number : str
+    Grammatical number filter ("sing", "plur", "all")
+sensor_type : str
+    Sensor configuration ("meg", "eeg", "mag", "grad", "all")
+data_type : str
+    Processing level ("raw", "preprocessed")
+roi : str
+    Region of interest for analysis
+
+Usage:
+------
+python fig_six_third_order_effects.py [-h] [-eoi EVENTS] [-rt RESPONSE_TYPE] 
+                                    [-dn DISTRACTOR_NUMBER] [-sensor SENSOR_TYPE]
+                                    [-data DATA_TYPE] ...
+
+Example:
+-------
+python fig_six_third_order_effects.py -eoi first_word_onset -rt correct -sensor meg 
+                                    -data preprocessed -baseline yes
+
+Dependencies:
+------------
+Standard Library:
+    - sys
+    - argparse
+External:
+    - numpy: Numerical operations
+    - matplotlib: Plotting
+    - seaborn: Enhanced visualization
+    - scipy: Statistical functions
+    - mne: MEG/EEG analysis
+    - statsmodels: Statistical modeling
+Local:
+    - config: Configuration settings
+    - func_repo: Utility functions
 
 
-The script analyzes the interactions between different conditions in neural data.
-It processes input arguments to configure the analysis, collects scores from subjects,
-and generates plots to visualize the third order effects.
+Author: Christos-Nikolaos Zacharopoulos
 
-Functions:
-----------
-- gn_parsing_object: Determines the distractor type based on grammatical number.
-- response_parsing_object: Determines the response type based on response category.
-- length_parsing_object: Determines the length of the epoch based on cropping.
-- baseline_parsing_object: Determines whether baseline correction is applied.
-- ssp_parsing_object: Determines whether SSP cleaning is applied.
-- grid_search_parsing_object: Determines whether grid search is applied.
-- collect_scores: Collects scores from all subjects for a given construction and effect.
-- make_figs_path: Creates the path for saving figures.
-- diagonal_cluster_test: Performs a permutation cluster test on diagonals.
 """
 # ============================================================================
 # modules
