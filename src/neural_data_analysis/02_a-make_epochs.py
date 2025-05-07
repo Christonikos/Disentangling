@@ -41,7 +41,6 @@ Technical Details
 ---------------
 - Supports parallel processing across subjects
 - Handles both MEG and EEG channels
-- Includes automatic bad channel detection
 - Common Average Reference for EEG
 
 Author: Christos-Nikolaos Zacharopoulos

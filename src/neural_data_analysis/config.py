@@ -68,6 +68,7 @@ join = op.join
 exists = op.exists
 make = os.makedirs
 
+
 # ==============================================================================
 # Project Configuration
 # ==============================================================================
@@ -97,7 +98,12 @@ second_order_effects = ["violation_congruency_interaction"]
 # ==============================================================================
 
 # Root directory setup
-root = os.path.join(os.sep, "media", "cz257680", "Transcend2")
+root = os.path.join(
+    os.sep,
+    "Volumes",
+    "Transcend",
+)
+
 path = FetchPaths(root, project_name)
 
 # Path definitions
@@ -107,6 +113,7 @@ figures_path = path.to_figures()
 output_path = path.to_output()
 supportive_dir = path.to_calibration_files()
 
+N_JOBS = -1
 # ==============================================================================
 # Processing Parameters
 # ==============================================================================
@@ -165,9 +172,9 @@ subjects_list = [
 ]
 
 # Bad channel marking
-bad_eeg = ["S06", "S07", "S08", "S09"]
-bad_meg = ["S08", "S09", "S11"]
-
+# bad_eeg = ["S06", "S07", "S08", "S09"]
+# bad_meg = ["S08", "S09", "S11"]
+allow_maxshield = True
 # ==============================================================================
 # Analysis Configuration
 # ==============================================================================

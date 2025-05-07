@@ -36,7 +36,8 @@ import mne
 from mne.io import Raw
 from mne.parallel import parallel_func
 from mne.preprocessing import compute_proj_ecg, compute_proj_eog
-import autoreject
+
+# import autoreject
 
 # Local imports
 sys.path.append("..")
