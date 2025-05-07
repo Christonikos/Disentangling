@@ -171,10 +171,27 @@ subjects_list = [
     "ICM07",
 ]
 
-# Bad channel marking
-# bad_eeg = ["S06", "S07", "S08", "S09"]
-# bad_meg = ["S08", "S09", "S11"]
+###############################################################################
+# MAXFILTER PARAMETERS
+# --------------------
 allow_maxshield = True
+mf_st_duration = None
+mf_head_origin = "auto"
+
+
+cal_files_path = os.path.join(
+    supportive_dir,
+)
+mf_ctc_fname = os.path.join(cal_files_path, "ct_sparse.fif")
+mf_cal_fname = os.path.join(cal_files_path, "sss_cal_171207.dat")
+
+mf_reference_run = 0
+
+
+resample_sfreq = None
+
+
+decim = 4
 # ==============================================================================
 # Analysis Configuration
 # ==============================================================================
