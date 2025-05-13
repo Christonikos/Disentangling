@@ -21,6 +21,41 @@ DIASTASE is a comprehensive multidisciplinary research project investigating the
 
   
 
+## Code and Data Availability
+
+All code for this project is available in this repository, providing a complete implementation of the experimental paradigm, analysis pipelines, and modeling components.
+
+### Data Access
+
+The neuroimaging (MEG/EEG) and behavioral data for this project are publicly available through the Open Science Framework (OSF) repository:
+
+- **OSF Repository**: [MEG, EEG and Behavioral Data for: 'Disentangling Hierarchical and Sequential Computations during Sentence Processing'](https://osf.io/yabqg/?view_only=b1166cea622c463eb46f8efb26a87197)
+- **Data Size**: 50.7GB
+
+
+This repository contains:
+- Raw MEG/EEG recordings
+- Preprocessed epoch files (cropped around the target onset)
+- Behavioral response data
+- Subject metadata
+
+Researchers interested in using or analyzing this data are encouraged to reference the original publication and cite the dataset using the DOI provided in the OSF repository.
+
+### Citation
+
+When using this code or data, please cite the following:
+
+```bibtex
+@article{zacharopoulos2022disentangling,
+  title={Disentangling Hierarchical and Sequential Computations during Sentence Processing},
+  author={Zacharopoulos, Christos-Nikolaos and Dehaene, Stanislas and Lakretz, Yair},
+  journal={bioRxiv},
+  pages={2022--07},
+  year={2022},
+  publisher={Cold Spring Harbor Laboratory}
+}
+```
+
 ## Project Overview
 
 Language is a complex cognitive function fundamental to human communication. Sentences in natural languages exhibit a hierarchical structure, often represented by linguists as nested trees. Understanding sentence meaning requires the human brain to construct these complex syntactic structures while receiving the words sequentially. Alongside this hierarchical processing mechanism, there may exist a simpler, linear form of processing that handles word-by-word sequences. This sequential processing is thought to be evolutionarily older and may potentially interfere with the more complex hierarchical structure processing, leading to errors in sentence comprehension.
