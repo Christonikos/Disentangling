@@ -390,7 +390,7 @@ The stimulus creation module (`src/stimulus_creation/`) provides a systematic fr
    
    # Generate sentences
    sentences = gen_sent(
-       condition="GSLS",  # Grammatical Same Local Same
+       condition="GSLS",  # Globally Standard Locally Standard (e.g, no conflicting short range or long range signals)
        words=words,
        embedding="pp",    # prepositional phrase
        stim_type="syntax",
