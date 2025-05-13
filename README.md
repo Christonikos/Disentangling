@@ -6,7 +6,7 @@
 
 # DIASTASE Project: Exploring Hierarchical vs. Sequential Processing in Language
 
-This project aims to enhance our understanding of how the human brain processes language.
+DIASTASE is a comprehensive multidisciplinary research project investigating the neural mechanisms underlying language comprehension through a combination of behavioral experiments, neuroimaging (MEG/EEG), and computational modeling. This project tackles a fundamental question in cognitive neuroscience: Does the brain process language using primarily hierarchical structure-building operations, sequential word-by-word prediction, or both systems in parallel? By analyzing patterns of grammatical errors, neural signatures of language processing, and computational LSTM models that simulate both types of processing, we aim to disentangle these potentially competing mechanisms. The project incorporates rigorously controlled linguistic stimuli, neuroimaging (MEG/EEG) data collection with advanced preprocessing pipelines, behavioral error-rate analysis, and computational modeling.  This repository contains the complete implementation across all project components, from stimulus creation to final data analysis.
 
 ## Table of Contents
 - [Project Overview](#project-overview)
