@@ -289,7 +289,7 @@ def run_epochs(subject: str) -> None:
     )
 
     # get the tmax: Duration of sentence + ISI to panel
-    tmax = 4.5
+    tmax = 1.5
 
     # Epoch the data
     print(f"Epoching, tmin: {c.tmin}, tmax: {tmax}")
@@ -333,7 +333,7 @@ if __name__ == "__main__":
         "-eoi",
         "--events_of_interest",
         nargs="+",
-        default=["first_word_onset"],
+        default=["target_onset"], # target_onset, first_word_onset
         help="Select events to epoch.",
     )
     parser.add_argument(
@@ -349,5 +349,7 @@ if __name__ == "__main__":
     print(args, n_jobs)
 
     # Run parallel processing
-    parallel, run_func, _ = parallel_func(run_epochs, n_jobs=n_jobs)
-    parallel(run_func(subject) for subject in c.subjects_list)
+    for data_to_epoch in ["raw", "preprocessed"]:
+
+        parallel, run_func, _ = parallel_func(run_epochs, n_jobs=n_jobs)
+        parallel(run_func(subject) for subject in c.subjects_list)

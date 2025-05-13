@@ -1,0 +1,22 @@
+############## LISTS ##############
+
+#--------- ONE-GRAM LIST ---------#
+http://norvig.com/mayzner.html
+#---------------------------------#
+###################################
+
+Davies, Mark. (2011) N-grams data from the Corpus of Contemporary American English (COCA). Downloaded from http://www.ngrams.info on March 18, 2019. 
+
+############ VAR NOTES ############
+
+#-------- UNACCUSATIVE EXPL ------#
+Intransitive sentences can be either unaccusative or unergative based on the the subject's thematic role. If the subject is the agent, the resulting construction is unergative. (e.g. Jane sneezed or John danced).
+
+If the subject is not an agent, the sentence is unaccusative. (e.g. Jane arrived or The snow melted)
+
+Ergative and accusative refer to cases (noun inflections). In languages that have it, accusative marks the objects of transitive verbs. Ergative case marks the subject of transitive verbs.
+
+###################################
+
+
+

@@ -1,0 +1,6 @@
+,pair_index,n1,pp,n2,v1,v2/n3/adverb,condition,sentence,violIndex,pp_freq,n1_freq,n2_freq,v1_freq,v2/n3/adverb_freq,pp_nl,n1_nl,n2_nl,v1_nl,v2/n3/adverb_nl,violation_type,n1_v1_freq,n2_v1_freq
+16018, ,,,,,,,The man that the woman likes leaves.,0,,,,,,,,,,,,,
+7690,,,,,,,,The car that the boy love departs.,1,,,,,,,,,,,,,
+17209,,,,,,,,The girl by the truck barks loudly.,1,,,,,,,,,,,,,
+19177,,,,,,,,The cat that the men loves moves.,1,,,,,,,,,,,,,
+31201,,,,,,,,The mouse that the car chases leaves. ,0,,,,,,,,,,,,,
