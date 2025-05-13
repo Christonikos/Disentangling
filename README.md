@@ -17,6 +17,9 @@ This project aims to enhance our understanding of how the human brain processes 
   - [Neural Data Analysis](#neural-data-analysis)
   - [Experiment Implementation](#experiment-implementation)
   - [Stimulus Creation](#stimulus-creation)
+  - [Computational Modeling](#computational-modeling)
+
+  
 
 ## Project Overview
 
@@ -508,6 +511,69 @@ The generator produces structured DataFrame output:
    - Verify feature distribution
    - Validate output structure
 
+
+## Computational Modeling
+
+The computational modeling component (`src/comp_model/`) implements LSTM-based language models to simulate and analyze the different aspects of language processing hypothesized in the DIASTASE project. This component aims to disentangle hierarchical and sequential sentence processing mechanisms by analyzing neural network behavior.
+
+### Key Features
+
+1. **LSTM Language Modeling** (`word_language_model/`)
+   - Pre-trained language models for predicting word sequences
+   - Support for multiple model architectures (LSTM, GRU, RNN)
+   - Customizable hyperparameters (embedding size, hidden layers, dropout)
+   - Evaluation metrics including perplexity and prediction accuracy
+
+2. **Activation Extraction** (`extract-activations.py`)
+   - Extracts internal representations from LSTM models
+   - Captures gate activations (input, forget, output gates)
+   - Stores hidden and cell states for analysis
+   - Processes experimental stimuli to generate model responses
+
+3. **Short-Range vs Long-Range Processing** (`sr_lr/`)
+   - Identifies specialized units for different processing types:
+     - Short-Range (SR) units: handling local dependencies
+     - Long-Range (LR) units: handling hierarchical structure
+   - Quantifies contribution of different processing mechanisms
+   - Visualizes competition between SR and LR processing
+
+4. **Neural Decoding Analysis** (`decoding.py`)
+   - Implements classification models to decode linguistic features
+   - Uses Generalization Across Time (GAT) analysis
+   - Compares model behavior with neural and behavioral data
+   - Identifies processing patterns similar to human comprehension
+
+### Running the Analysis
+
+1. **Extract LSTM Activations**:
+   ```bash
+   python src/comp_model/extract-activations.py --model models/hidden650_batch128_dropout0.2_lr20.0.pt --stimuli data/stimuli/stimuli.csv
+   ```
+
+2. **Analyze SR/LR Competition**:
+   ```bash
+   python src/comp_model/sr_lr_competition.py --path2stimuli data/stimuli/stimuli.csv
+   ```
+
+3. **Run Decoding Analysis**:
+   ```bash
+   python src/comp_model/decoding.py --model models/hidden650_batch128_dropout0.2_lr20.0.pt --var-type hidden
+   ```
+
+
+### Output
+
+The analysis generates several key outputs:
+
+1. **Activation Data**:
+   - Hidden and cell state activations for experimental stimuli
+   - Gate activations showing internal processing dynamics
+   - Word prediction probabilities and surprisal values
+
+2. **Visualization**:
+   - SR/LR competition plots for different structures and violations
+   - Generalization Across Time heatmaps
+   - Processing dynamics throughout sentence comprehension
 
 
 
